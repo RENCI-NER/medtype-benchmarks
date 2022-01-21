@@ -12,7 +12,7 @@ spec:
   restartPolicy: Never
   containers:
   - name: medtype-server
-    image: ggvaidya/medtype-server
+    image: ggvaidya/medtype-server:1.0
     ports:
     - containerPort: 8125
     volumeMounts:
