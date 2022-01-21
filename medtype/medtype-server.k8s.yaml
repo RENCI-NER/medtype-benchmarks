@@ -1,0 +1,31 @@
+# Kubernetes file for hosting Medtype on the RENCI Sterling cluster
+
+# Create a single Pod to run MedType. We don't need a full deployment of this,
+# just something to run while we're doing stuff.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: medtype-server
+  labels:
+    app: medtype-server
+spec:
+  containers:
+  - name: medtype-server
+    image: ggvaidya/medtype-server
+    volumeMounts:
+    - mountPath: "/"
+    ports:
+    - containerPort: 8125
+
+---
+# We would like to be able to access this port from within RENCI without making it public.
+apiVersion: v1
+kind: Service
+metadata:
+  name: medtype-hosting
+spec:
+  selector:
+    app: medtype-server
+  ports:
+    - port: 8125
+      protocol: TCP
