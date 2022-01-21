@@ -9,14 +9,19 @@ metadata:
   labels:
     app: medtype-server
 spec:
+  restartPolicy: Never
   containers:
   - name: medtype-server
     image: ggvaidya/medtype-server
-    volumeMounts:
-    - mountPath: "/"
     ports:
     - containerPort: 8125
-
+    resources:
+      requests:
+        memory: "64Gi"
+        cpu: "0.5"
+      limits:
+        memory: "64Gi"
+        cpu: "1"
 ---
 # We would like to be able to access this port from within RENCI without making it public.
 apiVersion: v1
@@ -29,3 +34,4 @@ spec:
   ports:
     - port: 8125
       protocol: TCP
+
