@@ -15,19 +15,39 @@ spec:
     image: ggvaidya/medtype-server
     ports:
     - containerPort: 8125
+    volumeMounts:
+    - mountPath: "/opt/medtype/.scispacy"
+      name: scispacy-scratch
     resources:
       requests:
+        ephemeral-storage: "10Gi"
         memory: "8Gi"
         cpu: "0.5"
       limits:
+        ephemeral-storage: "10Gi"
         memory: "16Gi"
         cpu: "1"
+  volumes:
+    - name: scispacy-scratch
+      ephemeral:
+        volumeClaimTemplate:
+          metadata:
+            labels:
+              app: medtype-server
+          spec:
+            accessModes: [ "ReadWriteOnce" ]
+            resources:
+              requests:
+                storage: "20Gi"
+
 ---
 # We would like to be able to access this port from within RENCI without making it public.
 apiVersion: v1
 kind: Service
 metadata:
   name: medtype-hosting
+  labels:
+    app: medtype-server
 spec:
   selector:
     app: medtype-server
