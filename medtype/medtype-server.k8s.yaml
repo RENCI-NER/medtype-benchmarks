@@ -17,10 +17,10 @@ spec:
     - containerPort: 8125
     resources:
       requests:
-        memory: "64Gi"
+        memory: "8Gi"
         cpu: "0.5"
       limits:
-        memory: "64Gi"
+        memory: "16Gi"
         cpu: "1"
 ---
 # We would like to be able to access this port from within RENCI without making it public.
