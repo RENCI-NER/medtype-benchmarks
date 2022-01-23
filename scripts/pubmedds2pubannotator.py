@@ -8,6 +8,7 @@
 #
 
 import click
+import json
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -24,15 +25,27 @@ logging.basicConfig(level=logging.INFO)
     dir_okay=False,
     writable=True,
     allow_dash=True
-), help='Where to write PubAnnotator file.')
+), help='PubAnnotator file to create (either JSON or JSONL, depending on the number of input texts)')
 def convert(input, output):
     """
     Convert INPUT (a PubMed DS file) into PubAnnotator.
-    :param input: A PubMed DS file.
-    :param output: A PubMed Annotator file.
-    :return: Exit code.
     """
-    logging.info(f"Converting input {input} to {output}")
+
+    with click.open_file(output, mode='w') as outp:
+        with click.open_file(input) as inp:
+            lines = inp.readlines()
+            for index, line in enumerate(lines):
+                abstract = json.loads(line)
+
+                annotator = {
+                    'source_db': 'PubMed',
+                    'source_url': f"https://pubmed.ncbi.nlm.nih.gov/{abstract['_id']}/",
+                    'project': 'PubMedDS',
+                    'text': abstract['text']
+                }
+
+                json.dump(annotator, outp, indent=4, sort_keys=True)
+                outp.write("\n")
 
 
 if __name__ == '__main__':
