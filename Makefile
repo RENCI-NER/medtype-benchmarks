@@ -2,8 +2,8 @@
 
 # PubMedDS doesn't have category information and isn't in
 # PubAnnotator format. This script fixes both of these issues.
-input/split_11.pubannotator.json: input/split_11.txt venv-activate
-	python scripts/pubmedds2pubannotator.py $<
+input/split_11.pubannotator.jsonl: input/split_11.txt venv-activate
+	python scripts/pubmedds2pubannotator.py $< -O $@
 
 # Create a virtual environment for Python work.
 venv:
