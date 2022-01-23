@@ -41,7 +41,8 @@ def convert(input, output):
                     'source_db': 'PubMed',
                     'source_url': f"https://pubmed.ncbi.nlm.nih.gov/{abstract['_id']}/",
                     'project': 'PubMedDS',
-                    'text': abstract['text']
+                    'text': abstract['text'],
+                    'denotations': abstract['mentions']
                 }
 
                 json.dump(annotator, outp, indent=4, sort_keys=True)
