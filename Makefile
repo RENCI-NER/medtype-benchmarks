@@ -1,20 +1,16 @@
 # Makefile for MedType Benchmarks
+#
+RUNVENV=. ./venv/bin/activate &&
 
 # PubMedDS doesn't have category information and isn't in
 # PubAnnotator format. This script fixes both of these issues.
-input/split_11.pubannotator.jsonl: input/split_11.txt venv-activate
-	python scripts/pubmedds2pubannotator.py $< -O $@
+input/split_11.pubannotator.jsonl: input/split_11.txt venv
+	$(RUNVENV) python scripts/pubmedds2pubannotator.py --normalize $< -O $@
 
 # Create a virtual environment for Python work.
 venv:
 	python3 -m venv venv
-	. ./venv/bin/activate
-	pip3 install -r requirements.txt
-
-venv-activate: venv
-	. ./venv/bin/activate
-
-.PHONY: venv-activate
+	$(RUNVENV) pip3 install -r requirements.txt
 
 # Clean outputs.
 clean:
