@@ -15,18 +15,22 @@ import logging
 
 logging.basicConfig(level=logging.INFO)
 
+
 # Look up abstracts on PubAnnotator via PubMed IDs.
 @functools.cache
 def get_pubannotations(pubmed_id):
     response = requests.get(f'https://pubannotation.org/docs/sourcedb/PubMed/sourceid/{pubmed_id}/annotations.json')
     if not response.ok:
-        logging.error(f"Could not look up PubMed ID {pubmed_id} on PubAnnotator: {response}")
+        logging.debug(f"Could not look up PubMed ID {pubmed_id} on PubAnnotator: {response}")
         return []
 
     result = response.json()
-    if not 'tracks' in result:
+    if not 'tracks' in result or not result['tracks']:
         return []
+
+    logging.info(f"Found {len(result['tracks'])} PubAnnotator annotations for PMID {pubmed_id}")
     return result['tracks']
+
 
 # Look up terms on the Node Normalization service.
 @functools.cache
@@ -125,7 +129,7 @@ def convert(input, output, normalize, pubannotation):
                 }
 
                 if normalize:
-                    annotator['tracks'].push({
+                    annotator['tracks'].append({
                         'project': 'PubMedDS+NodeNormalization',
                         'denotations': list(map(lambda m: translate_mention(m, normalize=True), abstract['mentions']))
                     })
@@ -135,7 +139,8 @@ def convert(input, output, normalize, pubannotation):
                     if annotations:
                         annotator['tracks'].extend(annotations)
 
-                json.dump(annotator, outp, indent=4, sort_keys=True)
+                # Do not indent -- it's no longer JSONL if you do that!
+                json.dump(annotator, outp)
                 outp.write("\n")
 
 
