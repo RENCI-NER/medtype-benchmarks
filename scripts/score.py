@@ -24,13 +24,13 @@ def score_file(input_path, output_file):
     """ Score an individual file and write it out to the given file. """
     with open(input_path, 'r') as f:
         for line in f:
-            entry = json.loads(line)
 
-            logging.info(f"Scoring {entry['source_url']}")
+            logging.info(f"Scoring {line[:100]}")
+            entry = json.loads(line)
 
             tracks = entry['tracks']
             for track in tracks:
-                logging.info(f"Track from {track['project']}: {len(track['denotations'])} denotations")
+                logging.info(f"{entry['source_url']}\t{track['project']}\t{len(track['denotations'])}")
 
 @click.command()
 @click.argument('input', type=click.Path(
@@ -45,7 +45,7 @@ def score(input, output):
     """
     input_path = click.format_filename(input)
 
-    logging.info(f"Globbing: {f'{input_path}/**/*.jsonl'}.")
+    # logging.info(f"Globbing: {f'{input_path}/**/*.jsonl'}.")
 
     if os.path.isdir(input_path):
         # TODO: make this better.
