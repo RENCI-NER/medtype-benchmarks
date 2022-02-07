@@ -75,6 +75,43 @@ def query_medtype(input, output, url, entity_linker):
 
             os.rename(raw_output_path + '.in-process', raw_output_path)
 
+            # Let's write out results in PubAnnotator format.
+            pubannotator_path = os.path.join(output_path, f'pmid-{pmid}.jsonl')
+            with open(pubannotator_path, 'w') as f_pubannotator:
+                if len(result['result']['elinks']) == 0:
+                    logging.warning(f"No results found for PMID {pmid}, skipping.")
+                    continue
+                elif len(result['result']['elinks']) > 1:
+                    raise RuntimeError(f"Too many results ('elinks') found for PMID {pmid}: {json.dumps(result['result']['elinks'], indent=4, sort_keys=True)}")
+
+                global mention_count
+                mention_count = 0
+                def mentions_to_denotations(mention):
+                    global mention_count
+                    mention_count += 1
+
+                    filtered_candidates = list(map(lambda fc: fc[0], mention['filtered_candidates']))
+
+                    return {
+                        'id': f"D{mention_count}",
+                        'link_ids': filtered_candidates,
+                        'obj': mention['pred_type'],
+                        'span': {
+                            'begin': mention['start_offset'],
+                            'end': mention['end_offset']
+                        },
+                        'text': mention['mention']
+                    }
+
+                medtype_denotations = {
+                    'project': 'MedType-default-2022feb7',
+                    'denotations': list(map(mentions_to_denotations, result['result']['elinks'][0]['mentions']))
+                }
+
+                pubannotator_entry = entry
+                pubannotator_entry['tracks'].append(medtype_denotations)
+                json.dump(pubannotator_entry, f_pubannotator)
+
             # What rate are we going at?
             count_processed = count_done - count_skipped
             time_processed_secs = (time.time_ns() - time_started)/1E9

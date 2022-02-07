@@ -30,12 +30,13 @@ def score_file(input_path, output_file):
 
             tracks = entry['tracks']
             for track in tracks:
-                logging.info(f"Track from {track['project']}")
+                logging.info(f"Track from {track['project']}: {len(track['denotations'])} denotations")
 
 @click.command()
 @click.argument('input', type=click.Path(
     file_okay=True,
-    dir_okay=True
+    dir_okay=True,
+    exists=True
 ))
 @click.option('--output', '-O', default='-', type=click.File('w'))
 def score(input, output):
@@ -44,8 +45,11 @@ def score(input, output):
     """
     input_path = click.format_filename(input)
 
+    logging.info(f"Globbing: {f'{input_path}/**/*.jsonl'}.")
+
     if os.path.isdir(input_path):
-        for filename in glob.iglob('**/*.jsonl', root_dir=input_path):
+        # TODO: make this better.
+        for filename in glob.iglob(f'{input_path}/**/*.jsonl', recursive=True):
             score_file(filename, output)
     else:
         score_file(input_path, output)
