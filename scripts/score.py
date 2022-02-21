@@ -81,7 +81,7 @@ def score_file(input_path, output_file):
         for span in denotations_by_span.keys():
             count = len(denotations_by_span[span])
             if count > 1:
-                print(f" - {span}:")
+                print(f" - {span} ({count} annotations):")
                 for den in denotations_by_span[span]:
                     print(f"  - {den['text']}: {den}")
 
