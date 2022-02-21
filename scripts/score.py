@@ -13,6 +13,7 @@ import logging
 import json
 import glob
 import os
+import re
 import time
 
 import click
@@ -20,17 +21,70 @@ import requests
 
 logging.basicConfig(level=logging.INFO)
 
+conf_limit = 1000
+
+
 def score_file(input_path, output_file):
     """ Score an individual file and write it out to the given file. """
     with open(input_path, 'r') as f:
-        for line in f:
+        # Collect all the denotations that span the same area.
+        denotations_by_span = {}
 
-            logging.info(f"Scoring {line[:100]}")
+        for line in f:
+            global conf_limit
+            conf_limit -= 1
+            if conf_limit < 0:
+                break
+            logging.debug(f"Scoring {line[:100]}")
             entry = json.loads(line)
+
+            def add_denotation(project, denotation):
+                source_url = entry['source_url']
+                logging.debug(f"{source_url} add_denotation({project}, {denotation})")
+
+                # Add the project to the denotation.
+                d = dict(denotation)
+                d['project'] = project
+
+                # Extract span.
+                denotation_begin = d['span']['begin']
+                denotation_end = d['span']['end']
+
+                # Look for an overlapping denotation.
+                flag_key_matched = False
+                for key in denotations_by_span.keys():
+                    m = re.match('^(\\d+)_(\\d+)$', key)
+                    if not m:
+                        raise RuntimeError(f"Key {key} is incorrectly formatted")
+
+                    span_start = int(m.group(1))
+                    span_end = int(m.group(2))
+
+                    # We currently define overlap as having at least one character overlap.
+                    if denotation_begin <= span_end and denotation_end >= span_start:
+                        denotations_by_span[key].append(d)
+                        flag_key_matched = True
+
+                if not flag_key_matched:
+                    # We couldn't find a match, so let's just add this.
+                    denotations_by_span[f"{denotation_begin}_{denotation_end}"] = [d]
 
             tracks = entry['tracks']
             for track in tracks:
-                logging.info(f"{entry['source_url']}\t{track['project']}\t{len(track['denotations'])}")
+                project = track['project']
+                denotations = track['denotations']
+                for denotation in denotations:
+                    add_denotation(project, denotation)
+
+        # Calculate scores
+        print("Denotations:")
+        for span in denotations_by_span.keys():
+            count = len(denotations_by_span[span])
+            if count > 1:
+                print(f" - {span}:")
+                for den in denotations_by_span[span]:
+                    print(f"  - {den['text']}: {den}")
+
 
 @click.command()
 @click.argument('input', type=click.Path(
