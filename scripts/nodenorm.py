@@ -16,11 +16,15 @@ import logging
 
 logging.basicConfig(level=logging.INFO)
 
+s = requests.Session()
+a = requests.adapters.HTTPAdapter(max_retries=10)
+s.mount('http://', a)
+s.mount('https://', a)
 
 # Look up terms on the Node Normalization service.
 @functools.cache
 def get_normalized_term(curie):
-    response = requests.get('https://nodenormalization-sri.renci.org/1.2/get_normalized_nodes', params={
+    response = s.get('https://nodenormalization-sri.renci.org/1.2/get_normalized_nodes', params={
         'curie': curie
     })
     if not response.ok:
