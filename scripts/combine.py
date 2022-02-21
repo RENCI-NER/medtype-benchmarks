@@ -58,8 +58,23 @@ def combine2(smaller_input, larger_input, output):
                             logging.info(f"Found PMID {pmid} shared between input files, combining.")
                             flag_found_in_smaller = True
 
+                            # Add new annotations from entry_smaller to entry.
+                            tracks = entry['tracks']
+                            projects = set(list(map(lambda tr: tr['project'], tracks)))
+                            tracker_smaller = entry_smaller['tracks']
+                            for track_smaller in tracker_smaller:
+                                project_smaller = track_smaller['project']
+                                if project_smaller in projects:
+                                    logging.info(f"Track with project {project_smaller} found, skipping")
+                                else:
+                                    logging.info(f"Track with project {project_smaller} not found, adding.")
+                                    entry['tracks'].append(track_smaller)
+
                 logging.info(f"Completed checks for {pmid}, found = {flag_found_in_smaller}")
 
+                # Write to the output file.
+                json.dump(entry, fout)
+                fout.write("\n")
 
 @click.command()
 @click.argument('input1', type=click.Path(
