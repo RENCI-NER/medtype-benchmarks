@@ -36,7 +36,7 @@ def normalize_entry(filename, output_path, track, first):
             if line.strip() == '':
                 continue
             entry = json.loads(line)
-            logging.info(f"{filename} line {index}: {entry}")
+            logging.debug(f"{filename} line {index}: {entry}")
 
             # Write the entry into the output file.
             if entry['source_url'].startswith('https://pubmed.ncbi.nlm.nih.gov/'):
@@ -45,6 +45,50 @@ def normalize_entry(filename, output_path, track, first):
                     pmid = pmid[:-1]
             else:
                 raise RuntimeError(f"Could not parse source ID: {entry['source_url']}")
+
+            # Look for the expected track.
+            tracks = entry['tracks']
+            flag_matched_track = False
+            for tr in tracks:
+                if tr['project'] == track:
+                    flag_matched_track = True
+
+                    # Normalize track and write to new_track
+                    new_track = {
+                        'project': f"{track}+NodeNorm",
+                        'denotations': []
+                    }
+
+                    denotations = tr['denotations']
+                    for denotation in denotations:
+                        if not first:
+                            raise RuntimeError(f"Only 'first' is currently supported.")
+                        else:
+                            link_ids = denotation['link_ids']
+                            if not link_ids:
+                                logging.warning(f"No link_id found in denotation {denotation} in entry {entry}")
+                                continue
+                            else:
+                                link_id = link_ids[0]
+
+                        # TODO: improve very dumb UMLS ID check.
+                        if link_id.startswith('C'):
+                            link_id = f"UMLS:{link_id}"
+
+                        # Look up link_id via NodeNorm.
+                        result = get_normalized_term(link_id)
+                        if link_id in result and 'id' in result[link_id] and 'identifier' in result[link_id]['id']:
+                            denotation['link_ids'] = [result[link_id]['id']['identifier']]
+
+                            if 'type' in result[link_id]:
+                                denotation['obj'] = result[link_id]['type']
+
+                        new_track['denotations'].append(denotation)
+
+                    tracks.append(new_track)
+
+            if not flag_matched_track:
+                logging.warning(f"Track '{track}' not found in {filename}")
 
             # Write to output.
             with open(os.path.join(output_path, f"pmid_{pmid}.jsonl"), "w") as fout:
