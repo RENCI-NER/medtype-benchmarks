@@ -46,6 +46,12 @@ def normalize_entry(filename, output_path, track, first):
             else:
                 raise RuntimeError(f"Could not parse source ID: {entry['source_url']}")
 
+            # Check for existing output file.
+            output_filename = os.path.join(output_path, f"pmid_{pmid}.jsonl")
+            if os.path.exists(output_filename):
+                logging.info(f"Found output for PMID {pmid}, skipping.")
+                continue
+
             # Look for the expected track.
             tracks = entry['tracks']
             flag_matched_track = False
@@ -91,8 +97,10 @@ def normalize_entry(filename, output_path, track, first):
                 logging.warning(f"Track '{track}' not found in {filename}")
 
             # Write to output.
-            with open(os.path.join(output_path, f"pmid_{pmid}.jsonl"), "w") as fout:
+            with open(output_filename + '.in-progress', "w") as fout:
                 json.dump(entry, fout)
+
+            os.rename(output_filename + '.in-progress', output_filename)
 
 
 @click.command()
