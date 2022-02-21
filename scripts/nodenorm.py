@@ -58,6 +58,8 @@ def normalize_entry(filename, output_path, track, first):
 
             # Look for the expected track.
             tracks = entry['tracks']
+            if not isinstance(tracks, list):
+                tracks = [tracks]
             flag_matched_track = False
             for tr in tracks:
                 if tr['project'] == track:
