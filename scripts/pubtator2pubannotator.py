@@ -43,7 +43,7 @@ def pubtator2pubannotator(input, output, project):
             continue
 
         # Read the t-line
-        m_t = re.match("^(\\d+)|t|(.*)$", line)
+        m_t = re.match("^(\\d+)\\|t\\|(.*)$", line)
         if not m_t:
             raise RuntimeError(f"Expected title line, found: {line} -- could not parse.")
 
@@ -52,7 +52,7 @@ def pubtator2pubannotator(input, output, project):
 
         # Read the a-line
         line = file.readline()
-        m_a = re.match("^(\\d+)|a|(.*)$", line)
+        m_a = re.match("^(\\d+)\\|a\\|(.*)$", line)
         if not m_a:
             raise RuntimeError(f"Expected abstract line, found: {line} -- could not parse.")
 
@@ -98,11 +98,12 @@ def pubtator2pubannotator(input, output, project):
             })
 
         # Write out entry
+        logging.debug(f"Writing out {pmid} with title {title} and abstract {abstract}.")
         entry = {
             'source_db': 'PubMed',
             'source_url': f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/",
             'project': project,
-            'text': abstract,
+            'text': title + ' ' + abstract,
             'tracks': {
                 'project': project,
                 'denotations': denotations
