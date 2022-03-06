@@ -61,7 +61,7 @@ def score_file(input_path, output_file):
                     span_end = int(m.group(2))
 
                     # We currently define overlap as having at least one character overlap.
-                    if denotation_begin <= span_end and denotation_end >= span_start:
+                    if int(denotation_begin) <= span_end and int(denotation_end) >= span_start:
                         denotations_by_span[key].append(d)
                         flag_key_matched = True
 
@@ -70,6 +70,8 @@ def score_file(input_path, output_file):
                     denotations_by_span[f"{denotation_begin}_{denotation_end}"] = [d]
 
             tracks = entry['tracks']
+            if not isinstance(tracks, list):
+                tracks = [tracks]
             for track in tracks:
                 project = track['project']
                 denotations = track['denotations']
