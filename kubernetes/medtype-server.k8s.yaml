@@ -21,12 +21,12 @@ spec:
     resources:
       requests:
         ephemeral-storage: "10Gi"
-        memory: "8Gi"
-        cpu: "0.5"
+        memory: "32Gi"
+        cpu: "4"
       limits:
         ephemeral-storage: "10Gi"
-        memory: "16Gi"
-        cpu: "1"
+        memory: "64Gi"
+        cpu: "8"
   volumes:
     - name: scispacy-scratch
       ephemeral:
