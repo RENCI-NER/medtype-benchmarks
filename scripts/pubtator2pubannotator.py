@@ -104,10 +104,10 @@ def pubtator2pubannotator(input, output, project):
             'source_url': f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/",
             'project': project,
             'text': title + ' ' + abstract,
-            'tracks': {
+            'tracks': [{
                 'project': project,
                 'denotations': denotations
-            }
+            }]
         }
         output.write(json.dumps(entry))
         output.write('\n')

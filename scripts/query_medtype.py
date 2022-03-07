@@ -109,6 +109,8 @@ def query_medtype(input, output, url, entity_linker):
                 }
 
                 pubannotator_entry = entry
+                if not isinstance(pubannotator_entry['tracks'], list):
+                    pubannotator_entry['tracks'] = [pubannotator_entry['tracks']]
                 pubannotator_entry['tracks'].append(medtype_denotations)
                 json.dump(pubannotator_entry, f_pubannotator)
 
