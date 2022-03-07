@@ -198,19 +198,7 @@ def score_file(input_path, output_file, filter_tracks):
                     # print("     - Identical obj (category) matches: {} ({:.2%})".format(count_obj_match, float(count_obj_match)/len_shared_spans))
 
     # print(json.dumps(results, sort_keys=True, indent=4))
-    for project1 in results.keys():
-        print(f" - Project 1: {project1}")
-        for project2 in results[project1].keys():
-            print(f"   - Project 2: {project2}")
-
-            result = results[project1][project2]
-
-            print("     - Total spans: {}".format(result['total_spans']))
-            print("     - Spans in project 1 but not in project 2: {} ({:.2%})".format(result['spans_in_1_but_not_2'], float(result['spans_in_1_but_not_2'])/result['total_spans']))
-            print("     - Spans in project 2 but not in project 1: {} ({:.2%})".format(result['spans_in_2_but_not_1'], float(result['spans_in_2_but_not_1'])/result['total_spans']))
-            print("     - Shared spans: {} ({:.2%}), of which:".format(result['shared_spans'], float(result['shared_spans'])/result['total_spans']))
-            print("       - Identical link_ids (item) matches: {} ({:.2%})".format(result['identical_link_ids'], float(result['identical_link_ids'])/result['shared_spans']))
-            print("       - Identical obj (category) matches: {} ({:.2%})".format(result['identical_obj'], float(result['identical_obj'])/result['shared_spans']))
+    return results
 
 @click.command()
 @click.argument('input', type=click.Path(
@@ -230,10 +218,39 @@ def score(input, output, filter):
 
     if os.path.isdir(input_path):
         # TODO: make this better.
+        results = {}
         for filename in glob.iglob(f'{input_path}/**/*.jsonl', recursive=True):
-            score_file(filename, output, filter)
+            # TODO: FIX
+            inner_result = score_file(filename, output, filter)
+
+            # Add this on to the results object.
+            for project1 in inner_result.keys():
+                if project1 not in results:
+                    results[project1] = {}
+                for project2 in inner_result[project1].keys():
+                    if project2 not in results[project1]:
+                        results[project1][project2] = {}
+                    for key in inner_result[project1][project2]:
+                        if key not in results[project1][project2]:
+                            results[project1][project2][key] = 0
+                        results[project1][project2][key] += inner_result[project1][project2][key]
+
     else:
-        score_file(input_path, output, filter)
+        results = score_file(input_path, output, filter)
+
+    for project1 in results.keys():
+        print(f" - Project 1: {project1}")
+        for project2 in results[project1].keys():
+            print(f"   - Project 2: {project2}")
+
+            inner_result = results[project1][project2]
+
+            print("     - Total spans across both projects: {}".format(inner_result['total_spans']))
+            print("     - Spans in project 1 but not in project 2: {} ({:.2%})".format(inner_result['spans_in_1_but_not_2'], float(inner_result['spans_in_1_but_not_2'])/inner_result['total_spans']))
+            print("     - Spans in project 2 but not in project 1: {} ({:.2%})".format(inner_result['spans_in_2_but_not_1'], float(inner_result['spans_in_2_but_not_1'])/inner_result['total_spans']))
+            print("     - Shared spans: {} ({:.2%}), of which:".format(inner_result['shared_spans'], float(inner_result['shared_spans'])/inner_result['total_spans']))
+            print("       - Identical link_ids (item) matches: {} ({:.2%})".format(inner_result['identical_link_ids'], float(inner_result['identical_link_ids'])/inner_result['shared_spans']))
+            print("       - Identical obj (category) matches: {} ({:.2%})".format(inner_result['identical_obj'], float(inner_result['identical_obj'])/inner_result['shared_spans']))
 
 
 if __name__ == '__main__':
