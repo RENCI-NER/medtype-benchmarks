@@ -24,8 +24,10 @@ logging.basicConfig(level=logging.INFO)
 conf_limit = 1000
 
 
-def score_file(input_path, output_file):
+def score_file(input_path, output_file, filter):
     """ Score an individual file and write it out to the given file. """
+    filter_set = set(filter)
+
     with open(input_path, 'r') as f:
         # Collect all the denotations that span the same area.
         denotations_by_span = {}
@@ -74,6 +76,8 @@ def score_file(input_path, output_file):
                 tracks = [tracks]
             for track in tracks:
                 project = track['project']
+                if len(filter) > 0 and project not in filter_set:
+                    continue
                 denotations = track['denotations']
                 for denotation in denotations:
                     add_denotation(project, denotation)
@@ -85,7 +89,10 @@ def score_file(input_path, output_file):
             if count > 1:
                 print(f" - {span} ({count} annotations):")
                 for den in denotations_by_span[span]:
-                    print(f"  - {den['text']}: {den}")
+                    if isinstance(den['obj'], list) and 'biolink:NamedThing' in den['obj']:
+                        print(f"  - [BIOLINK] {den['text']}: {den}")
+                    else:
+                        print(f"  - {den['text']}: {den}")
 
 
 @click.command()
@@ -95,7 +102,8 @@ def score_file(input_path, output_file):
     exists=True
 ))
 @click.option('--output', '-O', default='-', type=click.File('w'))
-def score(input, output):
+@click.option('--filter', '-f', help='List of projects whose tracks should be included (all other tracks are filtered out)', multiple=True)
+def score(input, output, filter):
     """
     score.py [PubAnnotator JSONL file or directory to annotate]
     """
@@ -106,9 +114,9 @@ def score(input, output):
     if os.path.isdir(input_path):
         # TODO: make this better.
         for filename in glob.iglob(f'{input_path}/**/*.jsonl', recursive=True):
-            score_file(filename, output)
+            score_file(filename, output, filter)
     else:
-        score_file(input_path, output)
+        score_file(input_path, output, filter)
 
 
 if __name__ == '__main__':
