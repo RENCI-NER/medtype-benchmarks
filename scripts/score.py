@@ -165,9 +165,8 @@ def score_file(input_path, output_file, filter_tracks):
                             for linkid1 in den1_linkids:
                                 if flag_linkid_match:
                                     break
+
                                 for den2 in dens2:
-                                    if flag_linkid_match:
-                                        break
                                     if linkid1 in den2['link_ids']:
                                         flag_linkid_match = True
                                         break
@@ -178,8 +177,6 @@ def score_file(input_path, output_file, filter_tracks):
                                     break
 
                                 for den2 in dens2:
-                                    if flag_obj_match:
-                                        break
                                     if obj1 in den2['obj']:
                                         flag_obj_match = True
                                         break
@@ -216,11 +213,12 @@ def score(input, output, filter):
 
     # logging.info(f"Globbing: {f'{input_path}/**/*.jsonl'}.")
 
+    count_files = 0
     if os.path.isdir(input_path):
         # TODO: make this better.
         results = {}
         for filename in glob.iglob(f'{input_path}/**/*.jsonl', recursive=True):
-            # TODO: FIX
+            count_files += 1
             inner_result = score_file(filename, output, filter)
 
             # Add this on to the results object.
@@ -237,7 +235,9 @@ def score(input, output, filter):
 
     else:
         results = score_file(input_path, output, filter)
+        count_files = 1
 
+    print(f"Counted results from {count_files} files.")
     for project1 in results.keys():
         print(f" - Project 1: {project1}")
         for project2 in results[project1].keys():
