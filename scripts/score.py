@@ -231,7 +231,14 @@ def score(input, output, filter):
                     for key in inner_result[project1][project2]:
                         if key not in results[project1][project2]:
                             results[project1][project2][key] = 0
+
+                        # The inner result should never cause the total to _decrease_.
+                        assert(inner_result[project1][project2][key] >= 0)
+
                         results[project1][project2][key] += inner_result[project1][project2][key]
+
+            # All of these numbers should be going up over time.
+            logging.debug(f"Processing {filename}, results at: {json.dumps(results, indent=2, sort_keys=True)}")
 
     else:
         results = score_file(input_path, output, filter)
