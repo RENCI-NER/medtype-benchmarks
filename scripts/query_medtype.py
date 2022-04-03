@@ -59,7 +59,7 @@ def query_medtype(input, output, url, entity_linker):
         response = requests.post(url, json={
             'id': f'PMID:{pmid}',
             'data': {
-                'text': [entry['text'] || ''],
+                'text': [entry.get('text', '')],
                 'entity_linker': entity_linker
             }
         })
