@@ -1,0 +1,17 @@
+# Kubernetes file for setting up a volume to use for MedType Benchmarks
+#
+# This volume will contain both input and output files.
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: medtype-benchmarks-data
+  labels:
+    app: medtype-benchmarks
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Gi
+  storageClassName: basic
