@@ -2,14 +2,15 @@
 FROM ggvaidya/medtype-server:dev
 
 # Reuse the `medtype` user from medtype-server.
-USER medtype
+ARG USERNAME=medtype
+USER ${USERNAME}
 
 # Create a directory for the scripts.
 ARG MEDTYPE_BENCHMARKS=/opt/medtype/benchmarks
 RUN mkdir ${MEDTYPE_BENCHMARKS}
 
 # Copy this directory/repository in.
-COPY . ${MEDTYPE_BENCHMARKS}
+COPY --chown=${USERNAME} . ${MEDTYPE_BENCHMARKS}
 
 # Set up a Python venv to work in.
 WORKDIR ${MEDTYPE_BENCHMARKS}
