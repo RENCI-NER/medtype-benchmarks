@@ -1,6 +1,9 @@
 # We start with the MedType server.
 FROM ggvaidya/medtype-server:dev
 
+# Reuse the `medtype` user from medtype-server.
+USER medtype
+
 # Create a directory for the scripts.
 ARG MEDTYPE_BENCHMARKS=/opt/medtype/benchmarks
 RUN mkdir ${MEDTYPE_BENCHMARKS}
