@@ -24,25 +24,16 @@ spec:
     resources:
       requests:
         ephemeral-storage: "2Gi"
-        memory: "8Gi"
+        memory: "32Gi"
         cpu: "4"
       limits:
         ephemeral-storage: "2Gi"
-        memory: "8Gi"
-        cpu: "4"
+        memory: "64Gi"
+        cpu: "8"
   volumes:
     - name: medtype-benchmarks-data
       persistentVolumeClaim:
         claimName: medtype-benchmarks-data
     - name: scispacy-scratch
-      ephemeral:
-        volumeClaimTemplate:
-          metadata:
-            labels:
-              app: medtype-server
-          spec:
-            accessModes: [ "ReadWriteOnce" ]
-            resources:
-              requests:
-                storage: "20Gi"
-
+      persistentVolumeClaim:
+        claimName: medtype-benchmarks-scispacy-scratch

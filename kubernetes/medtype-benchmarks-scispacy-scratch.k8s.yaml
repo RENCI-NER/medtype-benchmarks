@@ -1,0 +1,16 @@
+# Kubernetes file for setting up a volume to use for MedType Benchmarks
+# SciSpaCy model scratch space.
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: medtype-benchmarks-scispacy-scratch
+  labels:
+    app: medtype-benchmarks
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: basic
