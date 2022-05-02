@@ -89,7 +89,7 @@ def normalize_entry(filename, output_path, track, first):
 
                         # Look up link_id via NodeNorm.
                         result = get_normalized_term(link_id)
-                        if link_id in result and 'id' in result[link_id] and 'identifier' in result[link_id]['id']:
+                        if link_id in result and result[link_id] is not None and 'id' in result[link_id] and 'identifier' in result[link_id]['id']:
                             denotation['link_ids'] = [result[link_id]['id']['identifier']]
 
                             if 'type' in result[link_id]:
