@@ -13,6 +13,9 @@ spec:
   containers:
   - name: medtype-benchmarks
     image: ggvaidya/medtype-benchmarks:dev
+    # I just need something to run while I figure out how to make this work
+    command: [ "/bin/bash", "-c", "--" ]
+    args: [ "while true; echo Running; do sleep 30; done;" ]
     volumeMounts:
     - mountPath: "/opt/medtype/benchmarks/data"
       name: medtype-benchmarks-data
