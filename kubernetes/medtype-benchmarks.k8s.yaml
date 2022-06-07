@@ -1,0 +1,39 @@
+# Kubernetes file for running Medtype Benchmarks on the RENCI Sterling cluster
+
+# Create a single Pod to run MedType Benchmarks. We don't need a full deployment
+# of this, just something to run while we're doing stuff.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: medtype-benchmarks
+  labels:
+    app: medtype-benchmarks
+spec:
+  restartPolicy: Never # Once it's ready, it'll be okay to restart this.
+  containers:
+  - name: medtype-benchmarks
+    image: ggvaidya/medtype-benchmarks:dev
+    # I just need something to run while I figure out how to make this work
+    command: [ "/bin/bash", "-c", "--" ]
+    args: [ "while true; echo Running; do sleep 30; done;" ]
+    volumeMounts:
+    - mountPath: "/opt/medtype/benchmarks/data"
+      name: medtype-benchmarks-data
+    - mountPath: "/opt/medtype/.scispacy"
+      name: scispacy-scratch
+    resources:
+      requests:
+        ephemeral-storage: "2Gi"
+        memory: "32Gi"
+        cpu: "4"
+      limits:
+        ephemeral-storage: "2Gi"
+        memory: "64Gi"
+        cpu: "8"
+  volumes:
+    - name: medtype-benchmarks-data
+      persistentVolumeClaim:
+        claimName: medtype-benchmarks-data
+    - name: scispacy-scratch
+      persistentVolumeClaim:
+        claimName: medtype-benchmarks-scispacy-scratch
